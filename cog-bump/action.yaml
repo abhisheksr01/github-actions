@@ -44,6 +44,9 @@ outputs:
   is-version-bumped:
     description: Set to true if the version was bumped.
     value: ${{ steps.previous-version.outputs.previous-version != steps.current-version.outputs.current-version }}
+  is-dryrun-version-bumped:
+    description: Set to true if the version was bumped.
+    value: ${{ steps.bump-version.outputs.bump-version != '' }}
 
 runs:
   using: composite
@@ -128,4 +131,6 @@ runs:
         echo "current-version: ${{ steps.current-version.outputs.current-version }}"
         echo "Set to true if the version was bumped."
         echo "is-version-bumped: ${{ steps.previous-version.outputs.previous-version != steps.current-version.outputs.current-version }}"
+        echo "Boolean value set to `true` if a bump-version is available when `dryrun` is set to `true`."
+        echo "is-dryrun-version-bumped: {{ steps.bump-version.outputs.bump-version != '' }}"
       shell: bash

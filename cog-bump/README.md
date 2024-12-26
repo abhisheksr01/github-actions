@@ -39,9 +39,10 @@ You need to have your repository checked out with the full commit history and al
 
 ## Outputs
 
-| Name              | Value                                                                                                |
-|-------------------|------------------------------------------------------------------------------------------------------|
-| previous-version  | The version before the bump occurred.                                                                |
-| bump-version      | The version output of `cog bump` command either during tag creation or with `--dry-run`.             |
-| current-version   | The version after the bump. This will be the same as previous-version when no new version is tagged. |
-| is-version-bumped | Boolean value set to `true` if a new version was tagged.                                             |
+| Name                     | Value                                                                                                |
+|--------------------------|------------------------------------------------------------------------------------------------------|
+| previous-version         | The version before the bump occurred.                                                                |
+| bump-version             | The version output of `cog bump` command either during tag creation or with `--dry-run`.             |
+| current-version          | The version after the bump. This will be the same as previous-version when no new version is tagged. |
+| is-version-bumped        | Boolean value set to `true` if a new version was tagged.                                             |
+| is-dryrun-version-bumped | Boolean value set to `true` if a bump-version is available when `dryrun` is set to `true`.           |
