@@ -27,14 +27,14 @@ jobs:
       - check-conventional-commits
     outputs:
       current-version: ${{ steps.bump-version.outputs.current-version }}
-      version-was-bumped: ${{ steps.bump-version.outputs.version-was-bumped }}
+      is-version-bumped: ${{ steps.bump-version.outputs.is-version-bumped }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
-      - uses: abhisheksr01/github-actions/cog-bump@main # v1.0.0
+      - uses: abhisheksr01/github-actions/cog-bump@main
         id: bump-version
         with:
           git-user: "github-automation-bot"
@@ -48,7 +48,7 @@ jobs:
     needs:
       - tag-version
 
-    if: ${{ github.ref == 'refs/heads/main' && needs.tag-version.outputs.version-was-bumped == 'true'}}
+    if: ${{ github.ref == 'refs/heads/main' && needs.tag-version.outputs.is-version-bumped == 'true'}}
     steps:
       - uses: actions/checkout@v4
         with:

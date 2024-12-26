@@ -104,8 +104,8 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
-    - id: calculate-current-version
-      name: calculate-current-version
+    - id: current-version
+      name: current-version
       run: |
         if [ "${{ inputs.package }}" != "" ]; then
           CLI_OPTS+=' --package ${{ inputs.package }}'
@@ -125,7 +125,7 @@ runs:
         echo "The version output of cog-bump command either during tag creation or with dry-run."
         echo "bump-version: ${{ steps.bump-version.outputs.bump-version }}"
         echo "The current version after the bump determined by the conventional commits since the previous release."
-        echo "current-version: ${{ steps.bump-version.outputs.current-version }}"
+        echo "current-version: ${{ steps.current-version.outputs.current-version }}"
         echo "Set to true if the version was bumped."
-        echo "is-version-bumped: ${{ steps.bump-version.outputs.is-version-bumped }}"
+        echo "is-version-bumped: ${{ steps.previous-version.outputs.previous-version != steps.current-version.outputs.current-version }}"
       shell: bash
