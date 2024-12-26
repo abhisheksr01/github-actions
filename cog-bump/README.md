@@ -22,7 +22,7 @@ You need to have your repository checked out with the full commit history and al
 
 ```yaml
 - id: cog-bump
-  uses: abhisheksr01/github-actions/cog-bump
+  uses: abhisheksr01/github-actions/cog-bump@v0.1.0 # Check the GitHub Repo Releases for latest version
 ```
 
 ## Inputs

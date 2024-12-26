@@ -13,10 +13,10 @@ This action installs the specified version of [cocogitto](https://github.com/coc
 
 ```yaml
 # Uses the default version of cocogitto (currently 6.2.0)
-- uses: abhisheksr01/github-actions/setup-cocogitto
+- uses: abhisheksr01/github-actions/setup-cocogitto@v0.1.0 # Check the GitHub Repo Releases for latest version
 
 # Uses a specific version of cocogitto
-- uses: abhisheksr01/github-actions/setup-cocogitto
+- uses: abhisheksr01/github-actions/setup-cocogitto@v0.1.0 # Check the GitHub Repo Releases for latest version
   with:
     version: "6.1.0"
 
