@@ -53,6 +53,7 @@ runs:
         version: "6.2.0"
 
     - id: previous-version
+      name: previous-version
       run: |
         set -o pipefail
 
@@ -67,6 +68,7 @@ runs:
       shell: bash
 
     - id: bump-version
+      name: bump-version
       run: |
         set -eux
         echo "Setting git user : ${{ inputs.git-user }}"
@@ -102,7 +104,8 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
 
-    - id: current-version
+    - id: calculate-current-version
+      name: calculate-current-version
       run: |
         if [ "${{ inputs.package }}" != "" ]; then
           CLI_OPTS+=' --package ${{ inputs.package }}'
@@ -115,9 +118,14 @@ runs:
       working-directory: ${{ inputs.working-directory }}
 
     - id: outputs
+      name: outputs
       run: |
+        echo "The previous version determined by the existing tag with the highest SemVer version before the bump."
         echo "previous-version: ${{ steps.previous-version.outputs.previous-version }}"
+        echo "The version output of cog-bump command either during tag creation or with dry-run."
         echo "bump-version: ${{ steps.bump-version.outputs.bump-version }}"
+        echo "The current version after the bump determined by the conventional commits since the previous release."
         echo "current-version: ${{ steps.bump-version.outputs.current-version }}"
+        echo "Set to true if the version was bumped."
         echo "is-version-bumped: ${{ steps.bump-version.outputs.is-version-bumped }}"
       shell: bash
