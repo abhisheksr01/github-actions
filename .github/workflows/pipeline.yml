@@ -1,4 +1,5 @@
 name: CICD Pipeline
+
 on:
   push:
     branches:
@@ -8,11 +9,65 @@ on:
       - main
 
 jobs:
-  conventional-commit-check:
+  check-conventional-commits:
     runs-on: ubuntu-latest
+    name: check conventional commit compliance
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Conventional commit check
         uses: cocogitto/cocogitto-action@v3
+        
+  tag-version:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    needs:
+      - check-conventional-commits
+    outputs:
+      current-version: ${{ steps.bump-version.outputs.current-version }}
+      version-was-bumped: ${{ steps.bump-version.outputs.version-was-bumped }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - uses: abhisheksr01/github-actions/cog-bump@main # v1.0.0
+        id: bump-version
+        with:
+          git-user: "github-automation-bot"
+          git-user-email: "github.automation-gh@mail.com"
+          dry-run: ${{ github.ref != 'refs/heads/main' }}
+
+  create-release:
+    permissions:
+      contents: write # to be able to publish a GitHub release
+    runs-on: ubuntu-latest
+    needs:
+      - tag-version
+
+    if: ${{ github.ref == 'refs/heads/main' && needs.tag-version.outputs.version-was-bumped == 'true'}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: refs/tags/v${{ needs.tag-version.outputs.current-version }}
+
+      - uses: abhisheksr01/github-actions/setup-cocogitto@main
+
+      - name: Generate changelog
+        run: cog changelog --at v${{ needs.tag-version.outputs.current-version }} -t full_hash > GITHUB_CHANGELOG.md
+
+      - run: |
+          set -euo pipefail
+          echo "Creating release from tag $tag"
+          gh release create "$tag" \
+              --title="$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --notes-file GITHUB_CHANGELOG.md
+        env:
+          tag: v${{ needs.tag-version.outputs.current-version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
