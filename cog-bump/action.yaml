@@ -1,0 +1,115 @@
+name: Determine Next version_bump
+description: This Github Action calculates the next Semantic Version for you repository based on Conventional Commits.
+
+inputs:
+  working-directory:
+    description: The root of the git repository that you want to bump the version on.
+    required: false
+  git-user:
+    description: "Git user.name configuration"
+    required: false
+    default: "cog-automation-bot"
+  git-user-email:
+    description: "Git user.email configuration"
+    required: false
+    default: "cog.automation-gh@mail.com"
+  skip-ci:
+    description: "If true, adds '[skip ci]' to the bump commit message if the version is bumped."
+    required: false
+    default: "true"
+  package:
+    description: "Specify which package to bump for monorepo"
+    required: false
+    default: ""
+  dry-run:
+    description: "Dry-run: print the target version. No action taken"
+    required: false
+    default: "false"
+  version:
+    description: "Specify the semver to be set manually"
+    required: false
+    type: string
+    default: ""
+
+outputs:
+  previous-version:
+    description: The previous version determined by the existing tag with the highest SemVer version before the bump.
+    value: ${{ steps.previous-version.outputs.previous-version }}
+  bump-version:
+    description: The version output of cog-bump command either during tag creation or with dry-run.
+    value: ${{ steps.bump-version.outputs.bump-version }}
+  current-version:
+    description: The current version after the bump determined by the conventional commits since the previous release.
+    value: ${{ steps.current-version.outputs.current-version }}
+  is-version-bumped:
+    description: Set to true if the version was bumped.
+    value: ${{ steps.previous-version.outputs.previous-version != steps.current-version.outputs.current-version }}
+
+runs:
+  using: composite
+  steps:
+    - uses: abhisheksr01/github-actions/setup-cocogitto@main
+      with:
+        version: "6.2.0"
+
+    - id: previous-version
+      run: |
+        set -o pipefail
+
+        if [ "${{ inputs.package }}" != "" ]; then
+          CLI_OPTS+=' --package ${{ inputs.package }}'
+        fi
+
+        cog get-version $CLI_OPTS | tee .version || echo "0.0.0" | tee .version
+        echo "previous-version=$( cat .version )" >> $GITHUB_OUTPUT
+        rm .version
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+
+    - id: bump-version
+      run: |
+        set -eux
+        echo "Setting git user : ${{ inputs.git-user }}"
+        git config --global user.name "${{ inputs.git-user }}"
+
+        # Generate cli opts for cog
+        if [ "${{ inputs.version }}" != "" ]; then
+          re='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$'
+          if [[ "${{ inputs.version }}" =~ $re ]]; then
+            CLI_OPTS='--version=${{ inputs.version }}'
+          fi
+        else
+          CLI_OPTS='--auto'
+        fi
+
+        if [ ${{ inputs.skip-ci }} == "true" ]; then
+          CLI_OPTS+=' --skip-ci'
+        fi
+
+        if [ "${{ inputs.package }}" != "" ]; then
+          CLI_OPTS+=' --package ${{ inputs.package }}'
+        fi
+
+        if [ ${{ inputs.dry-run }} == "true" ]; then
+          CLI_OPTS+=' --dry-run'
+        fi
+
+        echo "Setting git user email ${{ inputs.git-user-email }}"
+        git config --global user.email "${{ inputs.git-user-email }}"
+
+        version=$(cog bump $CLI_OPTS | tail -n1)
+        echo "bump-version=$version" >> $GITHUB_OUTPUT
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - id: current-version
+      run: |
+        if [ "${{ inputs.package }}" != "" ]; then
+          CLI_OPTS+=' --package ${{ inputs.package }}'
+        fi
+
+        (cog get-version $CLI_OPTS || echo "0.0.0") | tee .version
+        echo "current-version=$( cat .version )" >> $GITHUB_OUTPUT
+        rm .version
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
