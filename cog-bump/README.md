@@ -1,6 +1,6 @@
 # cog-bump
 
-This Github Action bumps tags your repository with the next [Semantic Version](https://semver.org/) for you repository by using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+This Github Action bumps tags your repository with the next [Semantic Version](https://semver.org/) for you repository by using [Conventional Commits](https://docs.cocogitto.io/guide/commit.html).
 
 This action uses [Cogogitto](https://github.com/cocogitto/cocogitto). Once a new version has been tagged you will need to push it to Github. Alternatively, you can configure Cocogitto to perform the push in a [`cog.toml`](https://docs.cocogitto.io/config/#general) file in your repository.
 
@@ -22,7 +22,7 @@ You need to have your repository checked out with the full commit history and al
 
 ```yaml
 - id: cog-bump
-  uses: abhisheksr01/github-actions/cog-bump@v0.1.0 # Check the GitHub Repo Releases for latest version
+  uses: abhisheksr01/github-actions/cog-bump@v0.2.0 # Check the GitHub Repo Releases for latest version
 ```
 
 ## Inputs
