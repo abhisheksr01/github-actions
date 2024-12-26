@@ -113,3 +113,11 @@ runs:
         rm .version
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+
+    - id: outputs
+      run: |
+        echo "previous-version: ${{ steps.previous-version.outputs.previous-version }}"
+        echo "bump-version: ${{ steps.bump-version.outputs.bump-version }}"
+        echo "current-version: ${{ steps.bump-version.outputs.current-version }}"
+        echo "is-version-bumped: ${{ steps.bump-version.outputs.is-version-bumped }}"
+      shell: bash
