@@ -1,0 +1,42 @@
+name: Setup Cocogitto
+description: Install Cocogitto
+inputs:
+  version:
+    description: The Cocogitto version to use
+    default: "6.2.0"
+  architecture:
+    description: Supoprted architecture of release package to use
+    default: "x86_64-unknown-linux-musl"
+
+runs:
+  using: composite
+  steps:
+    - run: echo "Setting up Cocogitto version ${{inputs.version}}"
+      shell: bash
+    - id: install
+      shell: bash
+      run: |
+        set -eux
+        
+        CUR_DIR=$(pwd)
+        VERSION="${{inputs.version}}"
+        ARCHITECTURE="${{inputs.architecture}}"
+        TAR="cocogitto-$VERSION-$ARCHITECTURE.tar.gz"
+        BIN_DIR="$HOME/.local/bin"
+
+        if ! test -f $BIN_DIR/cog; then
+          echo "Installing Cocogitto version ${{inputs.version}}"
+          mkdir -p "$BIN_DIR"
+          cd "$BIN_DIR" || exit
+          curl -OL https://github.com/cocogitto/cocogitto/releases/download/"$VERSION"/"$TAR"
+          tar --strip-components=1 -xzf $TAR $ARCHITECTURE/cog
+          cd "$CUR_DIR" || exit
+        else
+            echo "Cocogitto already exists - skipping installation"
+        fi
+
+    - id: add-to-path
+      shell: sh
+      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+    - run: cog --version
+      shell: bash
